@@ -3,7 +3,7 @@
 FPS single-player de sobrevivência por ondas que roda direto no navegador (Three.js r147, sem build).
 Mapa de deserto inspirado em Dust II: ruas, prédios, plataformas, rampas, escadas, túnel e passarela.
 
-▶ **Jogar online:** `https://SEU_USUARIO.github.io/dust-siege/` (publicado automaticamente pelo GitHub Pages a cada push na branch `main`)
+▶ **Jogar online:** `https://evandromassini.github.io/dust-siege/` (publicado automaticamente pelo GitHub Pages a cada push na branch `main`)
 
 ## Recursos
 - Mapa com física própria (colisão AABB, rampas, degraus, plataformas) e iluminação/sombras em tempo real
