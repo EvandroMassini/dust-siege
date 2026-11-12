@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-// MAPA — "Deserto II": traçado inspirado em mapas de bombsite de deserto
+// MAPA — "Dust Siege": traçado inspirado em mapas de bombsite de deserto
 // (T spawn ao sul +Z, CT ao norte -Z, Long/A a oeste -X, túneis/B a leste +X)
 // Elevações: rampa da Long até o A (1.6 m), escadas, catwalk, plataforma B (1.0 m), janela e portas com vergas.
 // ═══════════════════════════════════════════════════════════

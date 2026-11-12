@@ -1,0 +1,32 @@
+name: Deploy Dust Siege (GitHub Pages)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Preparar site (remove arquivos que não vão para o jogo)
+        run: |
+          rm -rf backup .ollamapilot assets/textures/olds .git .github .devcontainer
+          touch .nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

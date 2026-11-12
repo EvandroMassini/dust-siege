@@ -1,0 +1,7 @@
+{
+  "name": "Dust Siege",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "forwardPorts": [8000],
+  "portsAttributes": { "8000": { "label": "Dust Siege", "onAutoForward": "openBrowser" } },
+  "postAttachCommand": "nohup python3 -m http.server 8000 >/dev/null 2>&1 &"
+}
