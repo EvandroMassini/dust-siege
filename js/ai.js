@@ -72,6 +72,11 @@ class EnemyManager {
       if (gt && gt.scene && socket) {
         const gc = gt.scene.clone(true);
         gc.traverse(o => { if (o.isMesh && o.material) o.material = Array.isArray(o.material) ? o.material.map(m => m.clone()) : o.material.clone(); });
+        // o rig do soldado está em cm (escala efetiva ~0.01): compensa para a arma ter tamanho real (metros)
+        group.updateMatrixWorld(true);
+        const ws = new THREE.Vector3(); socket.getWorldScale(ws);
+        if (ws.x > 1e-6) gc.scale.setScalar(1 / ws.x);
+        gc.traverse(o => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } });
         socket.add(gc);
       }
       if (tpl.animations && tpl.animations.length) mixer = new THREE.AnimationMixer(group);
