@@ -98,12 +98,27 @@
     #hit-marker.head::before, #hit-marker.head::after { background:#ffd23a; }
     #vignette { position:absolute; inset:0; pointer-events:none; z-index:9; background:radial-gradient(ellipse at center, transparent 55%, rgba(20,10,0,.38) 100%); }
     #ammo { font-variant-numeric: tabular-nums; }
+
+    /* ── tela inicial v3 ── */
+    #start-screen { max-width: min(92vw, 640px); max-height: 94vh; overflow-y: auto; scrollbar-width: none; }
+    #start-screen .sub { font-size:13px; letter-spacing:3px; color:#d9b48a; margin:-6px 0 14px; text-transform:uppercase; }
+    #diff-desc { font-size:13px; color:#c9c2bd; min-height:34px; margin:-6px auto 8px; max-width:440px; line-height:1.4; }
+    .keys { display:grid; grid-template-columns:repeat(2,1fr); gap:6px 22px; text-align:left; margin:14px auto 4px; max-width:470px; font-size:13px; color:#aaa; }
+    .keys span { display:flex; align-items:center; gap:8px; }
+    kbd { display:inline-block; min-width:26px; padding:2px 7px; text-align:center; font:600 11px 'Segoe UI',sans-serif; color:#fff; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.28); border-bottom-width:2px; border-radius:4px; white-space:nowrap; }
+    .legend { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:14px 0 2px; }
+    .legend div { font-size:11.5px; color:#bbb; padding:5px 9px; border:1px solid rgba(255,255,255,.12); border-radius:6px; background:rgba(255,255,255,.04); }
+    .legend b { color:#fff; }
+    #best { font-size:13px; color:#f1c40f; margin-top:14px; min-height:18px; text-shadow:0 1px 3px rgba(0,0,0,.8); }
+    .foot { font-size:11px; color:#777; margin-top:14px; }
+    #pause-ind { position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); z-index:18; display:none; pointer-events:none; text-align:center; color:#fff; font-size:44px; font-weight:800; letter-spacing:6px; text-shadow:0 2px 16px rgba(0,0,0,.9); }
+    #pause-ind small { display:block; font-size:15px; font-weight:400; letter-spacing:2px; color:#d9b48a; margin-top:8px; }
   </style>
 </head>
 <body>
   <div id="game-container">
     <div id="dmg-flash"></div>
-    <div id="vignette"></div><div id="scope"></div><div id="dmg-dir"></div><div id="banner"></div>
+    <div id="vignette"></div><div id="scope"></div><div id="dmg-dir"></div><div id="banner"></div><div id="pause-ind">PAUSADO<small>clique para continuar</small></div>
     <div id="hud">
       <div id="crosshair"><div class="dot"></div></div>
       <div id="hit-marker"></div>
@@ -127,15 +142,29 @@
     <div id="start-bg"></div>
     <div id="start-screen">
       <h1>FPS ARENA</h1>
+      <div class="sub">Deserto II &bull; sobreviva às ondas</div>
       <div class="diff-row">
         <button class="diff-btn" data-diff="easy">FÁCIL</button>
         <button class="diff-btn active" data-diff="normal">NORMAL</button>
         <button class="diff-btn" data-diff="hard">DIFÍCIL</button>
         <button class="diff-btn diff-god" data-diff="god">DEUS</button>
       </div>
+      <div id="diff-desc"></div>
       <div class="sens-row">Sensibilidade do mouse: <span id="sens-val">100%</span><input type="range" id="sens-slider" min="20" max="300" value="100" /></div>
-      <p class="controls">WASD mover &bull; Mouse mirar &bull; Clique atirar &bull; R recarregar<br>Espaço: pular &bull; Shift: abaixar &bull; Botão direito: mirar &bull; 1-6/Q/roda: trocar arma</p>
+      <div class="keys">
+        <span><kbd>W A S D</kbd> mover</span><span><kbd>Mouse</kbd> mirar</span>
+        <span><kbd>Clique</kbd> atirar</span><span><kbd>Botão dir.</kbd> mira / luneta</span>
+        <span><kbd>R</kbd> recarregar</span><span><kbd>Espaço</kbd> pular</span>
+        <span><kbd>Shift</kbd> / <kbd>C</kbd> agachar</span><span><kbd>1-6</kbd> <kbd>Q</kbd> <kbd>Roda</kbd> trocar arma</span>
+      </div>
+      <div class="legend">
+        <div><b>Soldado</b> equilibrado</div><div><b>Rusher</b> rápido, curta distância</div>
+        <div><b>Sniper</b> tiro longo e letal</div><div><b>Pesado</b> foguetes, muita vida</div>
+      </div>
+      <div class="legend"><div>Inimigos derrubados soltam <b>vida</b> e <b>munição</b></div><div>Tiro na <b>cabeça</b> = dano ×2,5</div></div>
+      <div id="best"></div>
       <button class="btn-start" id="start-btn">INICIAR</button>
+      <div class="foot">Clique na tela para capturar o mouse &bull; Esc pausa o jogo &bull; Créditos em CREDITOS.md</div>
     </div>
 
     <div id="loading">Carregando assets...</div>
