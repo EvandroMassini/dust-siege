@@ -1,0 +1,8 @@
+backup/
+.ollamapilot/
+assets/textures/olds/
+Links.txt
+LEIAME_v2.md
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Sempre limpar cache: revalidar a cada carga -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>FPS Arena — Deserto II</title>
+  <link rel="icon" href="data:," />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #111; font-family: 'Segoe UI', sans-serif; }
+    #game-container { width: 100vw; height: 100vh; position: relative; }
+    canvas { display: block; }
+
+    /* HUD */
+    #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+
+    /* Crosshair */
+    #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 28px; height: 28px; }
+    #crosshair::before, #crosshair::after { content:''; position:absolute; background:rgba(255,255,255,.9); }
+    #crosshair::before { width:2px; height:100%; left:50%; transform:translateX(-50%); }
+    #crosshair::after  { height:2px; width:100%; top:50%; transform:translateY(-50%); }
+    #crosshair .dot { position:absolute; top:50%; left:50%; width:4px; height:4px; background:#fff; border-radius:50%; transform:translate(-50%,-50%); }
+
+    /* Health */
+    #health-container { position:absolute; bottom:30px; left:30px; width:220px; height:22px; background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.3); border-radius:4px; overflow:hidden; }
+    #health-bar { height:100%; width:100%; background:linear-gradient(90deg,#e74c3c,#f39c12,#2ecc71); transition:width .3s; }
+    #health-text { position:absolute; bottom:56px; left:30px; color:#fff; font-size:14px; text-shadow:0 1px 3px rgba(0,0,0,.8); }
+
+    /* Ammo */
+    #ammo { position:absolute; bottom:30px; right:30px; color:#fff; font-size:28px; font-weight:bold; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+    #weapon-name { position:absolute; bottom:62px; right:30px; color:#aaa; font-size:14px; text-shadow:0 1px 3px rgba(0,0,0,.8); }
+
+    /* Score */
+    #score { position:absolute; top:20px; right:30px; color:#f1c40f; font-size:22px; font-weight:bold; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+
+    /* Kill feed */
+    #kill-feed { position:absolute; top:20px; left:30px; color:#fff; font-size:14px; text-shadow:0 1px 3px rgba(0,0,0,.8); }
+    #kill-feed div { margin-bottom:4px; transition:opacity .5s; }
+
+    /* Wave indicator */
+    #wave-info { position:absolute; top:20px; left:50%; transform:translateX(-50%); color:#e67e22; font-size:18px; font-weight:bold; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+
+    /* Game Over */
+    #game-over { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; text-align:center; display:none; pointer-events:auto; }
+    #game-over h1 { font-size:48px; margin-bottom:16px; color:#e74c3c; }
+    #game-over p { font-size:20px; margin-bottom:24px; }
+    .btn { padding:12px 32px; font-size:18px; background:#2ecc71; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+    .btn:hover { background:#27ae60; }
+
+    /* Start screen — fundo ocupa a janela toda */
+    #start-bg { position:absolute; inset:0; z-index:19; background:url("assets/bg_a.jpg?v=1") center/cover no-repeat, radial-gradient(circle at 50% 40%, rgba(231,76,60,.18) 0%, transparent 60%), linear-gradient(180deg, rgba(5,5,12,.35) 0%, rgba(5,5,12,.15) 45%, rgba(5,5,12,.72) 100%); backdrop-filter:saturate(.9) contrast(1.08); pointer-events:none; }
+    #start-screen { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; text-align:center; pointer-events:auto; z-index:20; background:linear-gradient(180deg, rgba(8,6,14,.72) 0%, rgba(10,8,16,.62) 100%); padding:44px 64px; border-radius:12px; border:1px solid rgba(231,76,60,.45); box-shadow:0 0 90px rgba(231,76,60,.22), inset 0 0 80px rgba(0,0,0,.5); min-width:420px; backdrop-filter:blur(2px) saturate(.9); }
+    #start-screen h1 { font-size:42px; margin-bottom:16px; letter-spacing:4px; text-shadow:0 0 20px rgba(231,76,60,.5); }
+    #start-screen p.controls { font-size:14px; color:#888; margin-top:12px; line-height:1.6; }
+    .diff-row { display:flex; gap:8px; justify-content:center; margin:16px 0; }
+    .diff-btn { padding:10px 22px; font-size:14px; background:rgba(255,255,255,.08); color:#aaa; border:1px solid rgba(255,255,255,.15); border-radius:6px; cursor:pointer; transition:.2s; }
+    .diff-btn:hover { background:rgba(255,255,255,.15); color:#fff; }
+    .diff-btn.active { background:rgba(231,76,60,.25); border-color:#e74c3c; color:#fff; box-shadow:0 0 12px rgba(231,76,60,.3); }
+    .sens-row { margin:14px 0; font-size:14px; color:#aaa; }
+    .sens-row input[type=range] { width:200px; vertical-align:middle; margin-left:8px; accent-color:#e74c3c; }
+    .btn-start { padding:14px 48px; font-size:20px; background:#e74c3c; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:20px; letter-spacing:2px; transition:.2s; }
+    .btn-start:hover { background:#c0392b; box-shadow:0 0 20px rgba(231,76,60,.4); }
+
+    /* Loading */
+    #loading { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; font-size:18px; z-index:30; display:none; }
+
+    /* Weapon selector bar */
+    #weapon-bar { position:absolute; bottom:70px; right:30px; display:flex; gap:6px; pointer-events:auto; }
+    .wpn-slot { width:42px; height:52px; border:2px solid rgba(255,255,255,.3); border-radius:4px; background:rgba(0,0,0,.5); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; font-size:11px; color:#aaa; }
+    .wpn-slot.active { border-color:#f1c40f; background:rgba(241,196,15,.15); color:#fff; }
+    .wpn-slot .key { font-size:10px; color:#888; margin-bottom:2px; }
+    .wpn-slot .name { font-size:10px; text-align:center; line-height:1.1; }
+
+    /* Damage flash */
+    #dmg-flash { position:absolute; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, transparent 40%, rgba(255,0,0,.4)); opacity:0; pointer-events:none; z-index:15; transition:opacity .15s; }
+
+    /* Crouch indicator */
+    #crouch-ind { position:absolute; bottom:90px; left:30px; color:#88ccff; font-size:12px; text-shadow:0 1px 2px rgba(0,0,0,.8); display:none; }
+
+    /* Hit marker */
+    #hit-marker { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(45deg); width:20px; height:20px; opacity:0; pointer-events:none; z-index:12; }
+    #hit-marker::before, #hit-marker::after { content:''; position:absolute; background:#ff4444; }
+    #hit-marker::before { width:2px; height:100%; left:50%; transform:translateX(-50%); }
+    #hit-marker::after  { height:2px; width:100%; top:50%; transform:translateY(-50%); }
+  
+    /* ── v2 ── */
+    #scope { position:absolute; inset:0; display:none; z-index:11; pointer-events:none; background:radial-gradient(circle at 50% 50%, transparent 0, transparent 30vmin, #000 30.4vmin); }
+    #scope::before, #scope::after { content:''; position:absolute; background:rgba(0,0,0,.85); }
+    #scope::before { left:0; right:0; top:50%; height:2px; }
+    #scope::after { top:0; bottom:0; left:50%; width:2px; }
+    #dmg-dir { position:absolute; top:50%; left:50%; width:0; height:0; opacity:0; transition:opacity .25s; pointer-events:none; z-index:14; transform:translate(-50%,-50%); }
+    #dmg-dir::before { content:''; position:absolute; left:-70px; top:-170px; width:140px; height:60px; background:radial-gradient(ellipse at 50% 100%, rgba(255,40,30,.75), rgba(255,40,30,0) 70%); }
+    #banner { position:absolute; top:16%; left:50%; transform:translateX(-50%); color:#ffd27a; font-size:34px; font-weight:800; letter-spacing:3px; text-shadow:0 2px 12px rgba(0,0,0,.9); opacity:0; transition:opacity .5s; pointer-events:none; z-index:13; text-align:center; }
+    #hit-marker.head::before, #hit-marker.head::after { background:#ffd23a; }
+    #vignette { position:absolute; inset:0; pointer-events:none; z-index:9; background:radial-gradient(ellipse at center, transparent 55%, rgba(20,10,0,.38) 100%); }
+    #ammo { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="dmg-flash"></div>
+    <div id="vignette"></div><div id="scope"></div><div id="dmg-dir"></div><div id="banner"></div>
+    <div id="hud">
+      <div id="crosshair"><div class="dot"></div></div>
+      <div id="hit-marker"></div>
+      <div id="health-text">HP: 100</div>
+      <div id="health-container"><div id="health-bar"></div></div>
+      <div id="ammo">30 / ∞</div>
+      <div id="weapon-name">SMG</div>
+      <div id="score">Score: 0</div>
+      <div id="kill-feed"></div>
+      <div id="wave-info"></div>
+      <div id="weapon-bar"></div>
+      <div id="crouch-ind">▼ ABAIXADO</div>
+    </div>
+
+    <div id="game-over">
+      <h1>VOCÊ MORREU</h1>
+      <p id="final-score">Score final: 0</p>
+      <button class="btn" id="restart-btn">Jogar novamente</button>
+    </div>
+
+    <div id="start-bg"></div>
+    <div id="start-screen">
+      <h1>FPS ARENA</h1>
+      <div class="diff-row">
+        <button class="diff-btn" data-diff="easy">FÁCIL</button>
+        <button class="diff-btn active" data-diff="normal">NORMAL</button>
+        <button class="diff-btn" data-diff="hard">DIFÍCIL</button>
+        <button class="diff-btn diff-god" data-diff="god">DEUS</button>
+      </div>
+      <div class="sens-row">Sensibilidade do mouse: <span id="sens-val">100%</span><input type="range" id="sens-slider" min="20" max="300" value="100" /></div>
+      <p class="controls">WASD mover &bull; Mouse mirar &bull; Clique atirar &bull; R recarregar<br>Espaço: pular &bull; Shift: abaixar &bull; Botão direito: mirar &bull; 1-6/Q/roda: trocar arma</p>
+      <button class="btn-start" id="start-btn">INICIAR</button>
+    </div>
+
+    <div id="loading">Carregando assets...</div>
+  </div>
+
+  <!-- Three.js r147 UMD local -->
+  <script src="lib/three.min.js"></script>
+  <script src="lib/GLTFLoader.js"></script>
+  <script src="js/retarget.js?v=3"></script>
+<script src="js/world.js?v=3"></script>
+  <script src="js/map.js?v=3"></script>
+  <script src="js/audio.js?v=3"></script>
+  <script src="js/fx.js?v=3"></script>
+  <script src="js/player.js?v=3"></script>
+  <script src="js/weapons.js?v=3"></script>
+  <script src="js/ai.js?v=3"></script>
+  <script src="js/main.js?v=3"></script>
+</body>
+</html>
